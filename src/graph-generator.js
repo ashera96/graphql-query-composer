@@ -32,7 +32,7 @@ class Node {
     if (this.kind === "UNION") {
       this.possibleTypes = [];
       _.forEach(data.possibleTypes, (possibleType) => {
-        this.possibleTypes.push({ name: possibleType.name, reference: null });
+        this.possibleTypes.push({ ref: possibleType.name });
       });
     } else {
       this.fields = [];
@@ -54,13 +54,13 @@ class Node {
           name: field.name,
           kind: type.kind,
           args: args,
-          next: { name: ref, reference: null },
+          ref: ref,
         });
       });
       if (this.kind === "INTERFACE") {
         this.derivedTypes = [];
         _.forEach(data.possibleTypes, (possibleType) => {
-          this.derivedTypes.push({ name: possibleType.name, reference: null });
+          this.derivedTypes.push({ ref: possibleType.name });
         });
       }
     }
@@ -112,43 +112,9 @@ function buildGraph(schema) {
     const node = new Node(nodeEntry);
     nodes.push(node);
   });
-  // Building graph
   var root = null;
   _.forEach(nodes, (node) => {
     node.name === rootName ? (root = node) : null;
   });
-  connectNodes(root, nodes);
-  return root;
-}
-
-function connectNodes(node, nodes) {
-  if (node.kind === "UNION") {
-    _.forEach(node.possibleTypes, (possibleType) => {
-      if (possibleType.reference === null) {
-        possibleType.reference = _.find(nodes, function (o) {
-          return o.name === possibleType.name;
-        });
-        connectNodes(possibleType.reference, nodes);
-      }
-    });
-  } else {
-    _.forEach(node.fields, (field) => {
-      if (field.next.name != null && field.next.reference === null) {
-        field.next.reference = _.find(nodes, function (o) {
-          return o.name === field.next.name;
-        });
-        connectNodes(field.next.reference, nodes);
-      }
-    });
-    if (node.kind === "INTERFACE") {
-      _.forEach(node.derivedTypes, (derivedType) => {
-        if (derivedType.reference === null) {
-          derivedType.reference = _.find(nodes, function (o) {
-            return o.name === derivedType.name;
-          });
-          connectNodes(derivedType.reference, nodes);
-        }
-      });
-    }
-  }
+  return { root: root, nodes: nodes };
 }
