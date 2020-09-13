@@ -25,42 +25,44 @@ function isNode(type) {
   );
 }
 
-function Node(data) {
-  this.name = data.name;
-  this.kind = data.kind;
-  if (this.kind === "UNION") {
-    this.possibleTypes = [];
-    _.forEach(data.possibleTypes, (possibleType) => {
-      this.possibleTypes.push({ name: possibleType.name, reference: null });
-    });
-  } else {
-    this.fields = [];
-    _.forEach(data.fields, (field) => {
-      const type = extractType(field.type);
-      const args = [];
-      _.forEach(field.args, (arg) => {
-        const argName = arg.name;
-        const argType = stringifyArgumentType(arg.type);
-        args.push({
-          argName: argName,
-          argType: argType.argumentType,
-          isRequired: argType.isRequired,
+class Node {
+  constructor(data) {
+    this.name = data.name;
+    this.kind = data.kind;
+    if (this.kind === "UNION") {
+      this.possibleTypes = [];
+      _.forEach(data.possibleTypes, (possibleType) => {
+        this.possibleTypes.push({ name: possibleType.name, reference: null });
+      });
+    } else {
+      this.fields = [];
+      _.forEach(data.fields, (field) => {
+        const type = extractType(field.type);
+        const args = [];
+        _.forEach(field.args, (arg) => {
+          const argName = arg.name;
+          const argType = stringifyArgumentType(arg.type);
+          args.push({
+            argName: argName,
+            argType: argType.argumentType,
+            isRequired: argType.isRequired,
+          });
+        });
+        var ref = null;
+        isNode(type) ? (ref = type.name) : (ref = null);
+        this.fields.push({
+          name: field.name,
+          kind: type.kind,
+          args: args,
+          next: { name: ref, reference: null },
         });
       });
-      var ref = null;
-      isNode(type) ? (ref = type.name) : (ref = null);
-      this.fields.push({
-        name: field.name,
-        kind: type.kind,
-        args: args,
-        next: { name: ref, reference: null },
-      });
-    });
-    if (this.kind === "INTERFACE") {
-      this.derivedTypes = [];
-      _.forEach(data.possibleTypes, (possibleType) => {
-        this.derivedTypes.push({ name: possibleType.name, reference: null });
-      });
+      if (this.kind === "INTERFACE") {
+        this.derivedTypes = [];
+        _.forEach(data.possibleTypes, (possibleType) => {
+          this.derivedTypes.push({ name: possibleType.name, reference: null });
+        });
+      }
     }
   }
 }
@@ -106,6 +108,7 @@ function buildGraph(schema) {
   const rootName = schema.queryType.name;
   const tempNodes = getNodes(schema);
   _.forEach(tempNodes, (nodeEntry) => {
+    // Extracting the relevant information
     const node = new Node(nodeEntry);
     nodes.push(node);
   });
@@ -115,7 +118,7 @@ function buildGraph(schema) {
     node.name === rootName ? (root = node) : null;
   });
   connectNodes(root, nodes);
-  return { root: root };
+  return root;
 }
 
 function connectNodes(node, nodes) {
@@ -139,9 +142,12 @@ function connectNodes(node, nodes) {
     });
     if (node.kind === "INTERFACE") {
       _.forEach(node.derivedTypes, (derivedType) => {
-        derivedType.reference = _.find(nodes, function (o) {
-          return o.name === derivedType.name;
-        });
+        if (derivedType.reference === null) {
+          derivedType.reference = _.find(nodes, function (o) {
+            return o.name === derivedType.name;
+          });
+          connectNodes(derivedType.reference, nodes);
+        }
       });
     }
   }
