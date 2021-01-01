@@ -1,7 +1,7 @@
 const _ = require("lodash");
 const { Source, introspectionFromSchema, buildSchema } = require("graphql");
 
-exports.getGraph = (schema) => {
+exports.generateGraph = (schema) => {
   const source = new Source(schema);
   const graphqlSchema = buildSchema(source);
   const introspection = introspectionFromSchema(graphqlSchema);
@@ -32,7 +32,9 @@ class Node {
     if (this.kind === "UNION") {
       this.possibleTypes = [];
       _.forEach(data.possibleTypes, (possibleType) => {
-        this.possibleTypes.push({ ref: possibleType.name });
+        this.possibleTypes.push({
+          ref: { name: possibleType.name, reference: null }
+        });
       });
     } else {
       this.fields = [];
@@ -48,19 +50,19 @@ class Node {
             isRequired: argType.isRequired,
           });
         });
-        var ref = null;
-        isNode(type) ? (ref = type.name) : (ref = null);
         this.fields.push({
           name: field.name,
           kind: type.kind,
           args: args,
-          ref: ref,
+          ref: { name: isNode(type) ? type.name : null, reference: null },
         });
       });
       if (this.kind === "INTERFACE") {
         this.derivedTypes = [];
         _.forEach(data.possibleTypes, (possibleType) => {
-          this.derivedTypes.push({ ref: possibleType.name });
+          this.derivedTypes.push({
+            ref: { name: possibleType.name, reference: null },
+          });
         });
       }
     }
@@ -105,16 +107,49 @@ function stringifyArgumentType(type) {
 function buildGraph(schema) {
   // Create nodes
   const nodes = [];
+  const root = null;
   const rootName = schema.queryType.name;
   const tempNodes = getNodes(schema);
   _.forEach(tempNodes, (nodeEntry) => {
     // Extracting the relevant information
     const node = new Node(nodeEntry);
     nodes.push(node);
-  });
-  var root = null;
-  _.forEach(nodes, (node) => {
+    // Determining the root node
     node.name === rootName ? (root = node) : null;
   });
-  return { root: root, nodes: nodes };
+  // Conneciting the nodes
+  connectNodes(root, nodes);
+  return root;
+}
+
+function connectNodes(node, nodes) {
+  if (node.kind === "UNION") {
+    _.forEach(node.possibleTypes, (possibleType) => {
+      if (possibleType.ref.reference === null) {
+        possibleType.ref.reference = _.find(nodes, function (o) {
+          return o.name === possibleType.ref.name;
+        });
+        connectNodes(possibleType.ref.reference, nodes);
+      }
+    });
+  } else {
+    _.forEach(node.fields, (field) => {
+      if (field.ref.name != null && field.ref.reference === null) {
+        field.ref.reference = _.find(nodes, function (o) {
+          return o.name === field.ref.name;
+        });
+        connectNodes(field.ref.reference, nodes);
+      }
+    });
+    if (node.kind === "INTERFACE") {
+      _.forEach(node.derivedTypes, (derivedType) => {
+        if (derivedType.ref.reference === null) {
+          derivedType.ref.reference = _.find(nodes, function (o) {
+            return o.name === derivedType.ref.name;
+          });
+          connectNodes(derivedType.ref.reference, nodes);
+        }
+      });
+    }
+  }
 }
