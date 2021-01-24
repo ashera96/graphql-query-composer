@@ -45,7 +45,7 @@ const queries = composeQueries(
   aliasCount
 );
 
-console.log(queries);
+// console.log(queries);
 fs.writeFile('queries.graphql', queries.join('\n\n'), function(err){
   if(err) {
     console.log(err);

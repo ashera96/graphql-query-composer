@@ -12,7 +12,7 @@ exports.composeQueries = (graphqlGraph, maxDepth, optionalArgumentsToInclude, al
     depthLimit = maxDepth;
     optionalArgs = optionalArgumentsToInclude;
     _.forEach(root.fields, (field) => {
-        let { queryBody, variableDefinitions } = generateQuery(root, field, "", [], curDepth)
+        let { queryBody, variableDefinitions } = generateQuery(root, field, "", [], curDepth);
         // to remove replicated variable definitions
         variableDefinitions = _.uniq(variableDefinitions.reverse());
         // repeating the generated query using aliasing
@@ -23,10 +23,33 @@ exports.composeQueries = (graphqlGraph, maxDepth, optionalArgumentsToInclude, al
         });
         queryBody = aliasedQuery;
         if (queryBody != "") {
-            queryList.push({ queryBody: queryBody, varDefinition: variableDefinitions });
+            queryList.push({
+                queryBody: queryBody,
+                varDefinition: variableDefinitions,
+            });
         }
     });
-    const generatedQueries = getCombinations(queryList);
+
+    // Combining generated queries to a single query
+    let combinedQueryBody = "";
+    let combinedVarDefinition = [];
+    _.forEach(queryList, (query) => {
+        combinedQueryBody += `${query.queryBody} `;
+        _.concat(combinedVarDefinition, query.varDefinition);
+    });
+    queryList.push({
+        queryBody: combinedQueryBody,
+        varDefinition: _.uniq(combinedVarDefinition),
+    });
+
+    // Generating queries by combining respective query body and variable definitions
+    const generatedQueries = [];
+    _.forEach(queryList, (query) => {
+        queryCounter++;
+        generatedQueries.push(
+            `query query${queryCounter}${query.varDefinition.length ? `(${query.varDefinition.join(", ")})` : ``} {${query.queryBody} }`
+        );
+    });
     return generatedQueries;
 }
 
@@ -95,26 +118,4 @@ function generateQuery(curNode, field, queryBody, variableDefinitions, curDepth)
         }
     }
     return { queryBody: queryBody, variableDefinitions: variableDefinitions };
-}
-
-function getCombinations(queryList) {
-    const queryCombinations = [];
-    const generatedQueries = [];
-    var f = function (prefix, list) {
-        for (var i = 0; i < list.length; i++) {
-            const combinedQueryBody = prefix.queryBody + list[i].queryBody;
-            const combinedVarDefinitions = _.concat(prefix.varDefinition, list[i].varDefinition);
-            queryCombinations.push([combinedQueryBody, combinedVarDefinitions]);
-            f({ queryBody: combinedQueryBody, varDefinition: combinedVarDefinitions }, list.slice(i + 1));
-        }
-    }
-    f({ queryBody: '', varDefinition: [] }, queryList);
-    _.forEach(queryCombinations, (combination) => {
-        const queryBody = combination[0];
-        const variableDefinitions = _.uniq(combination[1]);
-        queryCounter++;
-        const query = `query query${queryCounter}${variableDefinitions.length ? `(${variableDefinitions.join(', ')})` : ``} {${queryBody} }`;
-        generatedQueries.push(query);
-    })
-    return generatedQueries;
 }
