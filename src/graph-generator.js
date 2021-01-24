@@ -33,7 +33,7 @@ class Node {
       this.possibleTypes = [];
       _.forEach(data.possibleTypes, (possibleType) => {
         this.possibleTypes.push({
-          ref: { name: possibleType.name, reference: null }
+          ref: { name: possibleType.name, reference: null },
         });
       });
     } else {
@@ -106,8 +106,8 @@ function stringifyArgumentType(type) {
 
 function buildGraph(schema) {
   // Create nodes
+  var root = null;
   const nodes = [];
-  const root = null;
   const rootName = schema.queryType.name;
   const tempNodes = getNodes(schema);
   _.forEach(tempNodes, (nodeEntry) => {

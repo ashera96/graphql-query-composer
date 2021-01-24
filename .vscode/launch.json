@@ -11,7 +11,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "command": "graphql-query-composer --schema ./test/sample-schemas/countries.graphql --maxDepth 3"
+            "command": "graphql-query-composer --schema ./test/sample-schemas/starwars.graphql --maxDepth 5 --optionalArgumentsToInclude text --aliasCount 2"
         }
     ]
 }
