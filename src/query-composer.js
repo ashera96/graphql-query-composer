@@ -35,7 +35,7 @@ exports.composeQueries = (graphqlGraph, maxDepth, optionalArgumentsToInclude, al
     let combinedVarDefinition = [];
     _.forEach(queryList, (query) => {
         combinedQueryBody += `${query.queryBody} `;
-        _.concat(combinedVarDefinition, query.varDefinition);
+        combinedVarDefinition = _.concat(combinedVarDefinition, query.varDefinition);
     });
     queryList.push({
         queryBody: combinedQueryBody,

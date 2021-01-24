@@ -35,7 +35,7 @@ const typeDef = fs.readFileSync(schema, "utf-8");
 
 // Schema to graph conversion
 const graphqlGraph = generateGraph(typeDef);
-console.log(graphqlGraph);
+// console.log(graphqlGraph);
 
 // Composing queries by traversing the generated graph
 const queries = composeQueries(
