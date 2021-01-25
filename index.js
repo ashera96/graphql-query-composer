@@ -22,7 +22,7 @@ program
   .parse(process.argv);
 
 function getList(value) {
-  return value.split(" ");
+  return value.split(",");
 }
 
 const {
