@@ -13,16 +13,16 @@ exports.composeQueries = (graphqlGraph, maxDepth, optionalArgumentsToInclude, al
     optionalArgs = optionalArgumentsToInclude;
     _.forEach(root.fields, (field) => {
         let { queryBody, variableDefinitions } = generateQuery(root, field, "", [], curDepth);
-        // to remove replicated variable definitions
-        variableDefinitions = _.uniq(variableDefinitions.reverse());
-        // repeating the generated query using aliasing
-        let aliasedQuery = '';
-        entryPointCounter++;
-        _.times(aliasCount, (i) => {
-            aliasedQuery += `a${entryPointCounter}${i + 1}: ${queryBody} `;
-        });
-        queryBody = aliasedQuery;
         if (queryBody != "") {
+            // to remove replicated variable definitions
+            variableDefinitions = _.uniq(variableDefinitions.reverse());
+            // repeating the generated query using aliasing
+            let aliasedQuery = '';
+            entryPointCounter++;
+            _.times(aliasCount, (i) => {
+                aliasedQuery += `a${entryPointCounter}${i + 1}:${queryBody} `;
+            });
+            queryBody = aliasedQuery;
             queryList.push({
                 queryBody: queryBody,
                 varDefinition: variableDefinitions,
@@ -72,7 +72,7 @@ function generateQuery(curNode, field, queryBody, variableDefinitions, curDepth)
             subQuery += generateQuery(field, f, queryBody, variableDefinitions, curDepth + 1).queryBody;
         });
         if (subQuery != "") {
-            queryBody += ` ${field.name}${argsToInclude.length ? `(${_.map(argsToInclude, 'argument').join(', ')})` : ``} { ${subQuery} }`;
+            queryBody += ` ${field.name}${argsToInclude.length ? `(${_.map(argsToInclude, 'argument').join(', ')})` : ``} {${subQuery} }`;
             variableDefinitions.push(...(_.map(argsToInclude, 'variableDefinition')));
         }
     } else if (field.kind == "INTERFACE" && curDepth != depthLimit) {
