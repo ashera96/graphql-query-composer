@@ -11,7 +11,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "command": "graphql-query-composer --schema ./test/sample-schemas/yelp.graphql --maxDepth 5 --optionalArgumentsToInclude limit,location,term,offset,id,business --aliasCount 2"
+            "command": "graphql-query-composer --schema ./sample-schemas/countries.graphql --maxDepth 6 --aliasCount 2"
         }
     ]
 }

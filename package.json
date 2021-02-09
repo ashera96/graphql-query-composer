@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Package to compose resource intensive queries for a given GraphQL schema",
   "main": "index.js",
+  "bin": {
+    "graphql-query-composer": "./index.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,15 +15,13 @@
   },
   "keywords": [
     "graphql",
+    "query",
+    "generator",
     "schema",
-    "graph",
-    "query"
+    "graph"
   ],
-  "author": "ashera",
+  "author": "Ashera Silva",
   "license": "MIT",
-  "bin": {
-    "graphql-query-composer": "./index.js"
-  },
   "bugs": {
     "url": "https://github.com/ashera96/graphql-query-composer/issues"
   },

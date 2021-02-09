@@ -1179,33 +1179,3 @@ type Translation {
   languageCode: String!
   value: String!
 }
-
-
-### Test Schema - Query, Mutation & Subscription Types
-# type Mutation {
-#   deleteUser(name: String!): User!
-#   updateUser(name: String!, data: UpdateUserInput): User!
-# }
-
-# input UpdateUserInput {
-#   name: String
-#   age: Int
-# }
-
-# type Subscription {
-#   user: UserSubscription!
-# }
-
-# type UserSubscription {
-#   mutation: String!
-#   data: User!
-# }
-
-# type Query {
-#   users: [User!]!
-# }
-
-# type User {
-#   name: String!
-#   age: Int!
-# }
