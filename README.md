@@ -5,7 +5,7 @@ Given that an API has protection mechanisms in place to identify and block malic
 
 High-level architecture of the command-line tool usage:
 
-![Tool Usage](https://github.com/ashera96/graphql-query-composer/master/images/README_image.png?raw=true)
+![Tool Usage](./images/README_image.png?raw=true)
 
 ### Component 1:
 Conversion of GraphQL Schema to Graph: *src/graph-generator*
@@ -14,18 +14,17 @@ Conversion of GraphQL Schema to Graph: *src/graph-generator*
 Composing resource-intensive queries by traversing the GraphQL Graph: *src/query-composer*
 
 ## Usage
--------
 Installation
-```javascript
+```
 npm i graphql-query-composer -g
 ```
 Refer to usage
-```javascript
+```
 graphql-query-composer --help
 ```
 
 Usage of command-line tool
-```javascript
+```
 graphql-query-composer --schema ./sample-schemas/countries.graphql --maxDepth 6 --aliasCount 2
 ```
 
@@ -34,7 +33,7 @@ The generated set of queries can now be found in _./queries.graphql_ file (note 
 Consider using various configurations to increase the test coverage. Maybe the API already blocks deeply nested queries, but this alone does not guarentee the API security. While setting the depth limit to the highest value possible, by incrementing the _aliasCount_, malicious clients can request the same result set over and over again as intended.
 
 If any optional arguments need to be specified, the tool usage is as follows
-```javascript
+```
 graphql-query-composer --schema ./sample-schemas/countries.graphql --maxDepth 6 --aliasCount 2 --optionalArgumentsToInclude limit,offset
 ```
 
@@ -64,7 +63,7 @@ type Post {
 }
 ```
 Usage of the tool
-```javascript
+```
 graphql-query-composer --schema ./schema.graphql --maxDepth 4 --aliasCount 2
 ```
 
