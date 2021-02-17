@@ -30,17 +30,19 @@ exports.composeQueries = (graphqlGraph, maxDepth, optionalArgumentsToInclude, al
         }
     });
 
-    // Combining generated queries to a single query
-    let combinedQueryBody = "";
-    let combinedVarDefinition = [];
-    _.forEach(queryList, (query) => {
-        combinedQueryBody += `${query.queryBody} `;
-        combinedVarDefinition = _.concat(combinedVarDefinition, query.varDefinition);
-    });
-    queryList.push({
-        queryBody: combinedQueryBody,
-        varDefinition: _.uniq(combinedVarDefinition),
-    });
+    if (queryList.length>1) {
+        // Combining generated queries to a single query
+        let combinedQueryBody = "";
+        let combinedVarDefinition = [];
+        _.forEach(queryList, (query) => {
+            combinedQueryBody += `${query.queryBody} `;
+            combinedVarDefinition = _.concat(combinedVarDefinition, query.varDefinition);
+        });
+        queryList.push({
+            queryBody: combinedQueryBody,
+            varDefinition: _.uniq(combinedVarDefinition),
+        });
+    }
 
     // Generating queries by combining respective query body and variable definitions
     const generatedQueries = [];
