@@ -71,7 +71,7 @@ function generateQuery(curNode, field, queryBody, variableDefinitions, curDepth)
         var subQuery = "";
         const node = field.ref.reference;
         _.forEach(node.fields, (f) => {
-            subQuery += generateQuery(field, f, queryBody, variableDefinitions, curDepth + 1).queryBody;
+            subQuery += generateQuery(node, f, queryBody, variableDefinitions, curDepth + 1).queryBody;
         });
         if (subQuery != "") {
             queryBody += ` ${field.name}${argsToInclude.length ? `(${_.map(argsToInclude, 'argument').join(', ')})` : ``} {${subQuery} }`;
@@ -83,14 +83,14 @@ function generateQuery(curNode, field, queryBody, variableDefinitions, curDepth)
         const node = field.ref.reference;
         _.forEach(node.fields, (f) => {
             commonFields.push(f.name);
-            subQuery += generateQuery(field, f, queryBody, variableDefinitions, curDepth + 1).queryBody;
+            subQuery += generateQuery(node, f, queryBody, variableDefinitions, curDepth + 1).queryBody;
         });
         _.forEach(node.derivedTypes, (derivedType) => {
             var subSelection = "";
             const baseNode = derivedType.ref.reference;
             _.forEach(baseNode.fields, (f) => {
                 if (!_.includes(commonFields, f.name)) {
-                    subSelection += generateQuery(field, f, queryBody, variableDefinitions, curDepth + 1).queryBody;
+                    subSelection += generateQuery(baseNode, f, queryBody, variableDefinitions, curDepth + 1).queryBody;
                 }
             });
             if (subSelection != "") {
@@ -108,7 +108,7 @@ function generateQuery(curNode, field, queryBody, variableDefinitions, curDepth)
             var subSelection = "";
             const typeNode = possibleType.ref.reference;
             _.forEach(typeNode.fields, (f) => {
-                subSelection += generateQuery(field, f, queryBody, variableDefinitions, curDepth + 1).queryBody;
+                subSelection += generateQuery(typeNode, f, queryBody, variableDefinitions, curDepth + 1).queryBody;
             });
             if (subSelection != "") {
                 subQuery += " ... on " + possibleType.ref.name + " {" + subSelection + " }";
